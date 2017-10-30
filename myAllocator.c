@@ -72,7 +72,9 @@ void *arenaEnd = 0;
 
 void initializeArena() {
     if (arenaBegin != 0)	/* only initialize once */
-	return; 
+    {
+        return;
+    }
     arenaBegin = makeFreeBlock(sbrk(DEFAULT_BRKSIZE), DEFAULT_BRKSIZE);
     arenaEnd = ((void *)arenaBegin) + DEFAULT_BRKSIZE;
 }
@@ -183,16 +185,37 @@ void arenaCheck() {		/* consistency check */
 
 BlockPrefix_t *findFirstFit(size_t s) {	/* find first block with usable space > s */
     BlockPrefix_t *p = arenaBegin;
-    while (p) {
-	if (!p->allocated && computeUsableSpace(p) >= s)
-	    return p;
-	p = getNextPrefix(p);
+    while (p)
+    {
+        if (!p->allocated && computeUsableSpace(p) >= s)
+        {
+            return p;
+        }
+        p = getNextPrefix(p);
+    }
+    return growArena(s);
+}
+
+/* Find next block with usable space
+   This is very similiar to findFirstFit()
+ */
+BlockPrefix_t *findNextFit(size_t s)
+{
+    BlockPrefix_t *p = arenaBegin;
+    while (p)
+    {
+        if (!p -> allocated && computeUsableSpace(p) >= s)
+        {
+            return p;
+        }
+        p = getNextPrefix(p);
+        
+        
     }
     return growArena(s);
 }
 
 /* conversion between blocks & regions (offset of prefixSize */
-
 BlockPrefix_t *regionToPrefix(void *r) {
   if (r)
     return r - prefixSize;
@@ -211,15 +234,20 @@ void *prefixToRegion(BlockPrefix_t *p) {
 
 /* these really are equivalent to malloc & free */
 
-void *firstFitAllocRegion(size_t s) {
+void *firstFitAllocRegion(size_t s)
+{
   size_t asize = align8(s);
   BlockPrefix_t *p;
   if (arenaBegin == 0)		/* arena uninitialized? */
-    initializeArena();
+  {
+      initializeArena();
+  }
   p = findFirstFit(s);		/* find a block */
-  if (p) {			/* found a block */
+   if (p)
+   {			/* found a block */
     size_t availSize = computeUsableSpace(p);
-    if (availSize >= (asize + prefixSize + suffixSize + 8)) { /* split block? */
+    if (availSize >= (asize + prefixSize + suffixSize + 8))
+    { /* split block? */
       void *freeSliverStart = (void *)p + prefixSize + suffixSize + asize;
       void *freeSliverEnd = computeNextPrefixAddr(p);
       makeFreeBlock(freeSliverStart, freeSliverEnd - freeSliverStart);
@@ -227,10 +255,42 @@ void *firstFitAllocRegion(size_t s) {
     }
     p->allocated = 1;		/* mark as allocated */
     return prefixToRegion(p);	/* convert to *region */
-  } else {			/* failed */
+  }
+   else
+  {			/* failed */
     return (void *)0;
   }
-  
+}
+
+/* This finds the next fit region
+    It is very similiar to firstFitAllocRegion, but with minor changes
+ */
+void *nextFitAllocRegion(size_t s)
+{
+    size_t asize = align8(s);
+    BlockPrefix_t *p;
+    if (arenaBegin == 0)		/* arena uninitialized? */
+    {
+        initializeArena();
+    }
+    p = findNextFit(s);		/* find NEXT block */
+    if (p)
+    {	/* found a block */
+        size_t availSize = computeUsableSpace(p);
+        if (availSize >= (asize + prefixSize + suffixSize + 8))
+        { /* split block? */
+            void *freeSliverStart = (void *)p + prefixSize + suffixSize + asize;
+            void *freeSliverEnd = computeNextPrefixAddr(p);
+            makeFreeBlock(freeSliverStart, freeSliverEnd - freeSliverStart);
+            makeFreeBlock(p, freeSliverStart - (void *)p); /* piece being allocated */
+        }
+        p->allocated = 1;		/* mark as allocated */
+        return prefixToRegion(p);	/* convert to *region */
+    }
+    else
+    {			/* failed */
+        return (void *)0;
+    }
 }
 
 void freeRegion(void *r) {

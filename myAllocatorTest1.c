@@ -21,12 +21,15 @@ int main()
 {
   void *p1, *p2, *p3;
   arenaCheck();
-  p1 = firstFitAllocRegion(254);
+  //p1 = firstFitAllocRegion(254);
+    p1 = nextFitAllocRegion(254);
+    arenaCheck();
+    //p2 = firstFitAllocRegion(25400);
+    p2 = nextFitAllocRegion(25400);
   arenaCheck();
-  p2 = firstFitAllocRegion(25400);
-  arenaCheck();
-  p3 = firstFitAllocRegion(254);
-  printf("%8zx %8zx %8zx\n", p1, p2, p3);
+  //p3 = firstFitAllocRegion(254);
+    p3 = nextFitAllocRegion(254);
+  printf("p1, p2, p3: %8zx %8zx %8zx\n", p1, p2, p3);
   arenaCheck();
   freeRegion(p2);
   arenaCheck();
@@ -39,10 +42,12 @@ int main()
     int i;
     getutime(&t1);
     for(i = 0; i < 10000; i++)
-      if (firstFitAllocRegion(4) == 0) 
+      //if (firstFitAllocRegion(4) == 0)
+        if (nextFitAllocRegion(4) == 0)
 	break;
     getutime(&t2);
-    printf("%d firstFitAllocRegion(4) required %f seconds\n", i, diffTimeval(&t2, &t1));
+    //printf("%d firstFitAllocRegion(4) required %f seconds\n", i, diffTimeval(&t2, &t1));
+      printf("%d nextFitAllocRegion(4) required %f seconds\n", i, diffTimeval(&t2, &t1));
   }
   return 0;
 }
