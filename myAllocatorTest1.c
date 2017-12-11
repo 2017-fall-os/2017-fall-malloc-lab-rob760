@@ -19,30 +19,50 @@ void getutime(struct timeval *t)
 
 int main() 
 {
-  void *p1, *p2, *p3;
+  void *p1, *p2, *p3,*p4;
   arenaCheck();
   p1 = firstFitAllocRegion(254);
-  arenaCheck();
-  p2 = firstFitAllocRegion(25400);
-  arenaCheck();
+  p2 = firstFitAllocRegion(254);
   p3 = firstFitAllocRegion(254);
-  printf("%8zx %8zx %8zx\n", p1, p2, p3);
+  p4 = firstFitAllocRegion(254);
+  printf("%8zx %8zx %8zx %8zx\n", p1, p2, p3, p4);
   arenaCheck();
-  freeRegion(p2);
-  arenaCheck();
+  printf("freeing region p3\n");
   freeRegion(p3);
   arenaCheck();
   freeRegion(p1);
   arenaCheck();
+    
+    void *p5, *p6 *p7;
+    p5 = nextFitAllocRegion(512);
+    p6 = nextFitAllocRegion(8);
+    p7 = nextFitAllocRegion(32);
+    arenaCheck();
+    
+    
+    
   {				/* measure time for 10000 mallocs */
     struct timeval t1, t2;
     int i;
+      
+      
+      // testing time for firstFit
     getutime(&t1);
     for(i = 0; i < 10000; i++)
-      if (firstFitAllocRegion(4) == 0) 
+      if (firstFitAllocRegion(8) == 0)
 	break;
     getutime(&t2);
-    printf("%d firstFitAllocRegion(4) required %f seconds\n", i, diffTimeval(&t2, &t1));
+    printf("%d firstFitAllocRegion(8) required %f seconds\n", i, diffTimeval(&t2, &t1));
+      
+      
+      
+      //testing time for nextFit
+      getutime(&t1);
+      for(i = 0; i < 10000; i++)
+          if (nextFitAllocRegion(8) == 0)
+              break;
+      getutime(&t2);
+      printf("%d nextFitAllocRegion(8) required %f seconds\n", i, diffTimeval(&t2, &t1));
   }
   return 0;
 }
