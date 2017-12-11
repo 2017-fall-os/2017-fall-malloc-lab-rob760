@@ -205,6 +205,7 @@ BlockPrefix_t *findFirstFit(size_t s) {	/* find first block with usable space > 
 BlockPrefix_t *findNextFit(size_t s)
 {
     BlockPrefix_t *p = lastAllocatedRegion;
+
     while (p)
     {
         if (!p -> allocated && computeUsableSpace(p) >= s)
@@ -266,6 +267,9 @@ void *firstFitAllocRegion(size_t s)
 }
 
 
+/* This finds the next fit region
+    It is very similiar to firstFitAllocRegion, but with minor changes
+ */
 void *nextFitAllocRegion(size_t s)
 {
     size_t asize = align8(s);

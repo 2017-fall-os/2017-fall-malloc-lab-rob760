@@ -33,7 +33,7 @@ int main()
   freeRegion(p1);
   arenaCheck();
     
-    void *p5, *p6 *p7;
+    void *p5, *p6, *p7;
     p5 = nextFitAllocRegion(512);
     p6 = nextFitAllocRegion(8);
     p7 = nextFitAllocRegion(32);
@@ -63,6 +63,7 @@ int main()
               break;
       getutime(&t2);
       printf("%d nextFitAllocRegion(8) required %f seconds\n", i, diffTimeval(&t2, &t1));
+
   }
   return 0;
 }
