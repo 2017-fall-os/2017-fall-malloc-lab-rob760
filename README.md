@@ -4,6 +4,7 @@ I have added nextFitAllocRegion to myAllocator.c and updated myAllocatorTest1.c
 
 to compile:
     $ make
+
 to run the tests: 
     $ ./myAllocatorTest1 
 
